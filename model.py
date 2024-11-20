@@ -458,6 +458,11 @@ class TrafficModel(mesa.Model):
             for pos in semaforo:
                 sema_agent = SemaphoreAgent(semaforo_id, self)  # Asigna el mismo id
                 self.grid.place_agent(sema_agent, pos)
+        """This dictionary is going to look like this:
+            {Number_of_Step1: [(x1, y1), (x2, y2), ...],
+            Number_of_Step2: [(x1, y1), (x2, y2), ...]
+            Number_of_StepN: [(x1, y1), (x2, y2), ...]}
+        """
 
     # VIZUALIZATION
     def set_building_cells(self, buildings_coords, buildingLayer):
