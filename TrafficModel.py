@@ -204,11 +204,11 @@ class TrafficModel(mesa.Model):
 
         # Append the positions of the sorted CarAgents to the global_map
         for agent in car_agents:
-            self.global_map["Cars"].append(agent.pos)
+            self.global_map["Cars"].append({"x": agent.pos[0], "y": agent.pos[1]})
 
         # Append the traffic light states to the global_map
         self.global_map["Traffic_Lights"] = trafficLight
-        print(self.global_map)
+        return self.global_map
 
     # LAYER METHODS----------------------------------------------------------------------------------
     # Set the value of cells to indicate buildings

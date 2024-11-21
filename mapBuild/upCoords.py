@@ -21,7 +21,7 @@ up_coords = [
     # Left lane
     *[(22, y) for y in range(1, 22)],
     # Right lane
-    *[(23, y) for y in range(0, 22)],
+    *[(23, y) for y in range(0, 23)],
     # Parking spots
     # Parking spot 2
     (3, 21),

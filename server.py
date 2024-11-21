@@ -28,9 +28,6 @@ model = TrafficModel(
 
 # Run the model for a specified number of steps and store the global map
 global_map = []
-for i in range(5):
-    model.step()
-    global_map.append(model.create_global_map())
 
 
 @app.route("/")
@@ -46,7 +43,9 @@ def get_global_map():
     """
     Route to get the global map of the model.
     """
-    return jsonify(global_map)
+    # Run the model for a specified number of steps and store the global map
+    model.step()
+    return jsonify(model.get_global_map())
 
 
 if __name__ == "__main__":

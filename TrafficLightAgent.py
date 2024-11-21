@@ -27,6 +27,6 @@ class TrafficLightAgent(mesa.Agent):
         The traffic light changes state every 30 steps.
         """
         self.time_counter += 1
-        if self.time_counter >= 30:
+        if self.time_counter >= 10:
             self.change_state()
             self.time_counter = 0
