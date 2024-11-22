@@ -13,25 +13,6 @@ import numpy as np
 import pandas as pd
 from CarAgent import CarAgent
 from TrafficLightAgent import TrafficLightAgent
-import mapBuild.leftCoords
-import mapBuild.rightCoords  # Assuming you have this class
-
-"""
-Import the mapBuild module and the necessary files to create the model.
-"""
-import mapBuild
-
-# Storing the coordinates in a dictionary
-coords = {
-    "left_coords": mapBuild.leftCoords.left_coords,
-    "right_coords": mapBuild.rightCoords.right_coords,
-    "up_coords": mapBuild.upCoords.up_coords,
-    "down_coords": mapBuild.downCoords.down_coords,
-    "down_left_coords": mapBuild.downLeftCoords.down_left_coords,
-    "down_right_coords": mapBuild.downRightCoords.down_right_coords,
-    "up_left_coords": mapBuild.upLeftCoords.up_left_coords,
-    "up_right_coords": mapBuild.upRightCoords.up_right_coords,
-}
 
 
 class TrafficModel(mesa.Model):
@@ -62,7 +43,8 @@ class TrafficModel(mesa.Model):
         self.directions = {}
 
         # Global map to store the positions of all agents at each step
-        self.global_map = {}
+        self.global_map_cars = {}
+        self.global_map_traffic_lights = {}
 
         # Create a dictionary mapping each parking spot to a unique key starting from 1
         self.ParkingSpots = {i + 1: spot for i, spot in enumerate(parking_coords)}
@@ -224,7 +206,8 @@ class TrafficModel(mesa.Model):
     # Create a global map of the current state of the simulation
     def get_global_map(self):
         # Add the current step and agents' positions to the global_map
-        self.global_map = {"Cars": [], "Traffic_Lights": {}}
+        self.global_map_cars = {"Cars": []}
+        self.global_map_traffic_lights = {"Traffic_Lights": {}}
 
         # Collect all CarAgents and TrafficLightAgents and sort them by unique_id
         car_agents = []
@@ -241,11 +224,16 @@ class TrafficModel(mesa.Model):
 
         # Append the positions of the sorted CarAgents to the global_map
         for agent in car_agents:
-            self.global_map["Cars"].append(agent.pos)
+            self.global_map_cars["Cars"].append(agent.pos)
 
         # Append the traffic light states to the global_map
-        self.global_map["Traffic_Lights"] = trafficLight
-        print(self.global_map)
+        self.global_map_traffic_lights["Traffic_Lights"] = trafficLight
+
+        return self.global_map_cars, self.global_map_traffic_lights
+        """
+        print(self.global_map_cars)
+        print(self.global_map_traffic_lights)
+        """
 
     # LAYER METHODS----------------------------------------------------------------------------------
     # Set the value of cells to indicate buildings
