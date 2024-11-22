@@ -28,6 +28,7 @@ class TrafficModel(mesa.Model):
         buildings_coords=None,
         parking_coords=None,
         traffic_light_coords=None,
+        seed = None
     ):
         super().__init__()
         # ATTRIBUTES OF THE MODEL----------------------------------------------------------------------------------
@@ -53,11 +54,11 @@ class TrafficModel(mesa.Model):
         # LAYERS OF THE GRID---------------------------------------
         # Layer for buildings
         buildingLayer = mesa.space.PropertyLayer(
-            "building", width, height, np.int64(0), np.int64
+            "building", width, height, np.float64(0)
         )
         # layer for parking spots
         parkingsLayer = mesa.space.PropertyLayer(
-            "parking", width, height, np.int64(0), np.int64
+            "parking", width, height, np.float64(0)
         )
 
         # Set the to layer to its corresponding cell
