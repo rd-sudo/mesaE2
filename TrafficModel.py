@@ -12,7 +12,7 @@ import random
 import numpy as np
 import pandas as pd
 from CarAgent import CarAgent
-from TrafficLightAgent import TrafficLightAgent  # Assuming you have this class
+from TrafficLightAgent import TrafficLightAgent
 
 
 class TrafficModel(mesa.Model):
@@ -21,10 +21,7 @@ class TrafficModel(mesa.Model):
         width=24,
         height=24,
         num_agents=1,
-        left_coords=None,
-        right_coords=None,
-        up_coords=None,
-        down_coords=None,
+        coords=None,
         buildings_coords=None,
         parking_coords=None,
         traffic_light_coords=None,
@@ -38,6 +35,7 @@ class TrafficModel(mesa.Model):
         self.width = width
         self.height = height
         self.num_agents = num_agents
+        self.coords = coords
         self.parkings_coords = parking_coords
         self.traffic_light_coords = traffic_light_coords
 
@@ -45,7 +43,8 @@ class TrafficModel(mesa.Model):
         self.directions = {}
 
         # Global map to store the positions of all agents at each step
-        self.global_map = {}
+        self.global_map_cars = {}
+        self.global_map_traffic_lights = {}
 
         # Create a dictionary mapping each parking spot to a unique key starting from 1
         self.ParkingSpots = {i + 1: spot for i, spot in enumerate(parking_coords)}
@@ -71,7 +70,7 @@ class TrafficModel(mesa.Model):
 
         # CREATION OF AGENTS IN THE GRID---------------------------------------
         # Initialize the allowed directions for each cell
-        self.initialize_directions(left_coords, right_coords, up_coords, down_coords)
+        self.initialize_directions(coords)
 
         # Create the CarAgents and place them on the grid
         self.create_CarAgents()
@@ -94,7 +93,7 @@ class TrafficModel(mesa.Model):
 
     # INITIALIZER METHODS----------------------------------------------------------------------------------
     # Initialize allowed directions for each cell in the grid
-    def initialize_directions(self, left_coords, right_coords, up_coords, down_coords):
+    def initialize_directions(self, coords):
         for x in range(self.width):
             for y in range(self.height):
                 self.directions[(x, y)] = {
@@ -102,24 +101,44 @@ class TrafficModel(mesa.Model):
                     "right": False,
                     "up": False,
                     "down": False,
+                    "down_left": False,
+                    "down_right": False,
+                    "up_left": False,
+                    "up_right": False,
                 }
 
         # Set specific directions for each list
-        for coord in left_coords:
+        for coord in coords["left_coords"]:
             if coord in self.directions:
                 self.directions[coord]["left"] = True
 
-        for coord in right_coords:
+        for coord in coords["right_coords"]:
             if coord in self.directions:
                 self.directions[coord]["right"] = True
 
-        for coord in up_coords:
+        for coord in coords["up_coords"]:
             if coord in self.directions:
                 self.directions[coord]["up"] = True
 
-        for coord in down_coords:
+        for coord in coords["down_coords"]:
             if coord in self.directions:
                 self.directions[coord]["down"] = True
+
+        for coord in coords["down_left_coords"]:
+            if coord in self.directions:
+                self.directions[coord]["down_left"] = True
+
+        for coord in coords["down_right_coords"]:
+            if coord in self.directions:
+                self.directions[coord]["down_right"] = True
+
+        for coord in coords["up_left_coords"]:
+            if coord in self.directions:
+                self.directions[coord]["up_left"] = True
+
+        for coord in coords["up_right_coords"]:
+            if coord in self.directions:
+                self.directions[coord]["up_right"] = True
 
     # Create agents and place them on the grid
     def create_CarAgents(self):
@@ -187,7 +206,8 @@ class TrafficModel(mesa.Model):
     # Create a global map of the current state of the simulation
     def get_global_map(self):
         # Add the current step and agents' positions to the global_map
-        self.global_map = {"Cars": [], "Traffic_Lights": {}}
+        self.global_map_cars = {"Cars": []}
+        self.global_map_traffic_lights = {"Traffic_Lights": {}}
 
         # Collect all CarAgents and TrafficLightAgents and sort them by unique_id
         car_agents = []
@@ -204,11 +224,16 @@ class TrafficModel(mesa.Model):
 
         # Append the positions of the sorted CarAgents to the global_map
         for agent in car_agents:
-            self.global_map["Cars"].append({"x": agent.pos[0], "y": agent.pos[1]})
+            self.global_map_cars["Cars"].append(agent.pos)
 
         # Append the traffic light states to the global_map
-        self.global_map["Traffic_Lights"] = trafficLight
-        return self.global_map
+        self.global_map_traffic_lights["Traffic_Lights"] = trafficLight
+
+        return self.global_map_cars, self.global_map_traffic_lights
+        """
+        print(self.global_map_cars)
+        print(self.global_map_traffic_lights)
+        """
 
     # LAYER METHODS----------------------------------------------------------------------------------
     # Set the value of cells to indicate buildings

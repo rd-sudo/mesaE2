@@ -2,7 +2,7 @@ import mesa
 
 
 class TrafficLightAgent(mesa.Agent):
-    def __init__(self, unique_id, state, model):
+    def __init__(self, unique_id, state, model, group=None):
         """
         Initialize a TrafficLightAgent.
 
@@ -15,10 +15,11 @@ class TrafficLightAgent(mesa.Agent):
         self.unique_id = unique_id
         self.state = state
         self.time_counter = 0
+        self.group = group
 
-    def change_state(self):
+    def change_state(self, state):
         """Change the state of the traffic light."""
-        self.state = "green" if self.state == "red" else "red"
+        self.state = state
 
     def step(self):
         """
