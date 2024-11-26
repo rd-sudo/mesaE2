@@ -185,17 +185,22 @@ class TrafficModel(mesa.Model):
             # Place the agent in the 'Spawn' cell using the correct coordinates
             self.grid.place_agent(agent, Spawn)
 
-    # Place traffic light agents on the grid
     def place_TrafficLight_agents(self):
-        for idx, traffic_light_info in enumerate(self.traffic_light_coords):
-            traffic_light_id = f"sema_{idx}"  # Unique ID for each traffic light
-            positions = traffic_light_info[:2]
-            initial_state = traffic_light_info[2]
+        for traffic_light_id, traffic_light_info in self.traffic_light_coords.items():
+            positions = traffic_light_info["position"]
+            initial_state = traffic_light_info["state"]
+            group = traffic_light_info["group"]
+            monitored_coords = traffic_light_info["monitored_coords"]
 
-            # Create two separate agents with the same id and place them in the corresponding positions
+            # Create separate agents with the same id and place them in the corresponding positions
             for pos in positions:
                 sema_agent = TrafficLightAgent(
-                    traffic_light_id, initial_state, self
+                    traffic_light_id=traffic_light_id,
+                    state=initial_state,
+                    model=self,
+                    group=group,
+                    position=positions,
+                    monitored_positions=monitored_coords,
                 )  # Assign the same id
                 self.grid.place_agent(sema_agent, pos)
 
@@ -231,10 +236,8 @@ class TrafficModel(mesa.Model):
         self.global_map_traffic_lights["Traffic_Lights"] = trafficLight
 
         return self.global_map_cars, self.global_map_traffic_lights
-        """
-        print(self.global_map_cars)
-        print(self.global_map_traffic_lights)
-        """
+        # print(self.global_map_cars)
+        # print(self.global_map_traffic_lights)
 
     # LAYER METHODS----------------------------------------------------------------------------------
     # Set the value of cells to indicate buildings
