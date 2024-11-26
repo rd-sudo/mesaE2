@@ -28,70 +28,78 @@ class TrafficModel(mesa.Model):
     ):
         super().__init__()
         # ATTRIBUTES OF THE MODEL----------------------------------------------------------------------------------
-        self.random = random.Random()
-        self.steps = 0
-
-        # Parameters
         self.width = width
         self.height = height
         self.num_agents = num_agents
         self.coords = coords
+        self.buildings_coords = buildings_coords
         self.parkings_coords = parking_coords
         self.traffic_light_coords = traffic_light_coords
 
-        # Dictionary to store directions for each cell
-        self.directions = {}
+        # Initialize random generator and step counter
+        self.random = random.Random()
+        self.steps = 0
 
-        # Global map to store the positions of all agents at each step
+        # Initialize direction dictionary and global maps
+        self.directions = {}
         self.global_map_cars = {}
         self.global_map_traffic_lights = {}
+        self.traffic_light_groups = {}
 
-        # Create a dictionary mapping each parking spot to a unique key starting from 1
-        self.ParkingSpots = {i + 1: spot for i, spot in enumerate(parking_coords)}
+        # Create a dictionary mapping each parking spot to a unique key
+        self.ParkingSpots = {i + 1: spot for i, spot in enumerate(self.parkings_coords)}
 
-        # LAYERS OF THE GRID---------------------------------------
-        # Layer for buildings
-        buildingLayer = mesa.space.PropertyLayer(
-            "building", width, height, np.int64(0), np.int64
-        )
-        # layer for parking spots
-        parkingsLayer = mesa.space.PropertyLayer(
-            "parking", width, height, np.int64(0), np.int64
-        )
-
-        # Set the to layer to its corresponding cell
-        self.set_building_cells(buildings_coords, buildingLayer)
-        self.set_parking_cells(parking_coords, parkingsLayer)
-
-        # Create a MultiGrid object the two layers
-        self.grid = mesa.space.MultiGrid(
-            width, height, True, (buildingLayer, parkingsLayer)
-        )
+        # Initialize grid layers
+        self.initialize_layers()
 
         # CREATION OF AGENTS IN THE GRID---------------------------------------
-        # Initialize the allowed directions for each cell
-        self.initialize_directions(coords)
+        # Initialize agents and their positions
+        self.initialize_agents()
 
-        # Create the CarAgents and place them on the grid
-        self.create_CarAgents()
-
-        # Place the traffic lights on the grid
-        self.place_TrafficLight_agents()
-
-        # Initialize the DataCollector
-        self.datacollector = mesa.DataCollector(
-            model_reporters={},
-            agent_reporters={
-                "TargetParkingSpot": lambda agent: (
-                    agent.target_parking_spot if isinstance(agent, CarAgent) else None
-                )
-            },
-        )
-
-        # Collect initial data
+        # Initialize data collector
+        self.datacollector = mesa.DataCollector(model_reporters={}, agent_reporters={})
         self.datacollector.collect(self)
 
+    # LAYERS OF THE GRID---------------------------------------
+    def initialize_layers(self):
+        """Initialize the grid layers for buildings, parking spots, and traffic monitoring."""
+        buildingLayer = mesa.space.PropertyLayer(
+            "building", self.width, self.height, np.int64(0), np.int64
+        )
+        parkingsLayer = mesa.space.PropertyLayer(
+            "parking", self.width, self.height, np.int64(0), np.int64
+        )
+        trafficMonitoringLayer = mesa.space.PropertyLayer(
+            "traffic_monitoring", self.width, self.height, np.int64(0), np.int64
+        )
+
+        self.set_building_cells(buildingLayer)
+        self.set_parking_cells(parkingsLayer)
+        self.set_traffic_monitoring_cells(trafficMonitoringLayer)
+
+        self.grid = mesa.space.MultiGrid(
+            self.width,
+            self.height,
+            True,
+            (buildingLayer, parkingsLayer, trafficMonitoringLayer),
+        )
+        """I am checking if the traffic lights are checking the right amount of cars in their monitored area
+        list_of_cords_of_traffic_lights = [(2, 4),(0, 6)]
+        for cord in list_of_cords_of_traffic_lights:
+            for agent in self.grid.get_cell_list_contents(cord):
+                if isinstance(agent, TrafficLightAgent):
+                    print(f"Agent:{agent.traffic_light_id} Found: {agent.cars_in_monitored_area()} in his area.")
+        """
+
     # INITIALIZER METHODS----------------------------------------------------------------------------------
+    def initialize_agents(self):
+        """Initialize the agents in the grid."""
+        self.initialize_directions(self.coords)
+        self.create_traffic_light_groups()
+        self.create_CarAgents()
+        self.create_CarAgents_no_target()
+        self.place_TrafficLight_agents()
+
     # Initialize allowed directions for each cell in the grid
     def initialize_directions(self, coords):
         for x in range(self.width):
@@ -140,50 +148,63 @@ class TrafficModel(mesa.Model):
             if coord in self.directions:
                 self.directions[coord]["up_right"] = True
 
+    def create_CarAgents_no_target(self):
+        """Create car agents without a target parking spot."""
+        number_of_cars = 50
+        all_coords = [(x, y) for x in range(self.width) for y in range(self.height)]
+        available_coords = [
+            coord
+            for coord in all_coords
+            if coord not in self.parkings_coords and coord not in self.buildings_coords
+        ]
+
+        if len(available_coords) < number_of_cars:
+            raise ValueError("Not enough available coordinates to place all cars.")
+
+        for _ in range(number_of_cars):
+            spawn_position = random.choice(available_coords)
+            available_coords.remove(spawn_position)
+            agent = CarAgent(self, spawn_position, None)
+            self.grid.place_agent(agent, spawn_position)
+
     # Create agents and place them on the grid
     def create_CarAgents(self):
+        """Create car agents and place them on the grid."""
         used_parking_spots = set()
 
-        for i in range(self.num_agents):
+        for _ in range(self.num_agents):
             available_spawn_spots = [
                 spot
                 for spot in self.ParkingSpots.values()
                 if spot not in used_parking_spots
             ]
 
-            if available_spawn_spots:
-                Spawn = random.choice(available_spawn_spots)
-            else:
-                # If no available spots for spawning, take some action (e.g., break or similar)
+            if not available_spawn_spots:
                 print("No available spots for spawn")
                 break
 
-            used_parking_spots.add(Spawn)
+            spawn = random.choice(available_spawn_spots)
+            used_parking_spots.add(spawn)
 
-            # Create a list of available spots for the target parking (excluding the spawn spot and used spots)
             available_target_spots = [
                 spot
                 for spot in self.ParkingSpots.values()
-                if spot != Spawn and spot not in used_parking_spots
+                if spot != spawn and spot not in used_parking_spots
             ]
 
-            if available_target_spots:
-                target_parking_spot = random.choice(available_target_spots)
-            else:
-                # If no available spots for target parking, take some action (e.g., break or continue)
+            if not available_target_spots:
                 print("No available spots for target parking")
-                break  # or continue with some other action.
+                break
 
-            # Mark the target spot as used
+            target_parking_spot = random.choice(available_target_spots)
             used_parking_spots.add(target_parking_spot)
 
-            print(f"Spawn: ({Spawn}), Target: ({target_parking_spot})")
+            print(f"Spawn: ({spawn}), Target: ({target_parking_spot})")
 
-            agent = CarAgent(self, Spawn, target_parking_spot)  # Pass the coordinates
+            agent = CarAgent(self, spawn, target_parking_spot)
+            self.grid.place_agent(agent, spawn)
 
-            # Place the agent in the 'Spawn' cell using the correct coordinates
-            self.grid.place_agent(agent, Spawn)
-
+    # TRAFFIC LIGHT METHODS----------------------------------------------------------------------------------
     def place_TrafficLight_agents(self):
         for traffic_light_id, traffic_light_info in self.traffic_light_coords.items():
             positions = traffic_light_info["position"]
@@ -203,18 +224,25 @@ class TrafficModel(mesa.Model):
                 )  # Assign the same id
                 self.grid.place_agent(sema_agent, pos)
 
+    def create_traffic_light_groups(self):
+        """Create a map of traffic light groups."""
+        for traffic_light_id, traffic_light_info in self.traffic_light_coords.items():
+            group = traffic_light_info["group"]
+            if group not in self.traffic_light_groups:
+                self.traffic_light_groups[group] = []
+            self.traffic_light_groups[group].append(traffic_light_id)
+
     # GETTER METHODS----------------------------------------------------------------------------------
-    # Fetch the direction info for a specific cell
     def get_cell_directions(self, pos):
+        """Fetch the direction info for a specific cell."""
         return self.directions.get(pos, None)
 
     # Create a global map of the current state of the simulation
     def get_global_map(self):
-        # Add the current step and agents' positions to the global_map
+        """Create a global map of the current state of the simulation."""
         self.global_map_cars = {"Cars": []}
         self.global_map_traffic_lights = {"Traffic_Lights": {}}
 
-        # Collect all CarAgents and TrafficLightAgents and sort them by unique_id
         car_agents = []
         trafficLight = {}
 
@@ -227,28 +255,31 @@ class TrafficModel(mesa.Model):
 
         car_agents.sort(key=lambda agent: agent.unique_id)
 
-        # Append the positions of the sorted CarAgents to the global_map
         for agent in car_agents:
             self.global_map_cars["Cars"].append(agent.pos)
 
-        # Append the traffic light states to the global_map
         self.global_map_traffic_lights["Traffic_Lights"] = trafficLight
 
         return self.global_map_cars, self.global_map_traffic_lights
-        # print(self.global_map_cars)
-        # print(self.global_map_traffic_lights)
 
     # LAYER METHODS----------------------------------------------------------------------------------
-    # Set the value of cells to indicate buildings
-    def set_building_cells(self, buildings_coords, buildingLayer):
-        for coord in buildings_coords:
+    def set_building_cells(self, buildingLayer):
+        """Set the value of cells to indicate buildings."""
+        for coord in self.buildings_coords:
             buildingLayer.set_cell(coord, 1)
 
-    # Set the value of cells to indicate parking spots
-    def set_parking_cells(self, parking_coords, parkingsLayer):
-
-        for coord in parking_coords:
+    def set_parking_cells(self, parkingsLayer):
+        """Set the value of cells to indicate parking spots."""
+        for coord in self.parkings_coords:
             parkingsLayer.set_cell(coord, 1)
+
+    def set_traffic_monitoring_cells(self, trafficMonitoringLayer):
+        """Set the value of cells to indicate traffic monitoring spots."""
+        all_monitored_coords = []
+        for traffic_light in self.traffic_light_coords.values():
+            all_monitored_coords.extend(traffic_light["monitored_coords"])
+        for coord in all_monitored_coords:
+            trafficMonitoringLayer.set_cell(coord, 1)
 
     # STEP METHOD----------------------------------------------------------------------------------
     # Execute one step of the model, shuffle agents, and collect data

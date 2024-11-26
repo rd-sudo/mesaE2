@@ -1,18 +1,19 @@
 import mesa
 import numpy as np
 import random
-from TrafficLightAgent import TrafficLightAgent  # Assuming you have this class
+
+from TrafficLightAgent import TrafficLightAgent
 
 
 class CarAgent(mesa.Agent):
-    def __init__(self, model, spawn_position, target_parking_spot):
+    def __init__(self, model, spawn_position, target_parking_spot=None):
         super().__init__(model)
         self.active = True
         self.parking_spots = [
             coord for coord in model.parkings_coords if coord != spawn_position
         ]
         self.distance_travelled = 0
-        self.target_parking_spot = random.choice(list(model.ParkingSpots.values()))
+        self.target_parking_spot = target_parking_spot
 
     def check_semaphore(
         self, current_position
@@ -30,12 +31,9 @@ class CarAgent(mesa.Agent):
         return None
 
     def is_semaphore_green(self, semaphore_agent, position):
-        if semaphore_agent.state == "red":
-            print(f"Semaphore at {position} is red; agent cannot move.")
-            return False
-        elif semaphore_agent.state == "green":
-            print(f"Semaphore at {position} is green; agent can move.")
+        if semaphore_agent.state == "green":
             return True
+        return False
 
     def check_agent(self, new_position):
         agents_at_position = self.model.grid.get_cell_list_contents([new_position])

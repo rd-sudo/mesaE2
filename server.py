@@ -18,6 +18,9 @@ from mapBuild.downRightCoords import down_right_coords
 from mapBuild.upLeftCoords import up_left_coords
 from mapBuild.upRightCoords import up_right_coords
 
+from CarAgent import CarAgent
+from TrafficLightAgent import TrafficLightAgent
+
 # Storing the coordinates in a dictionary
 coords = {
     "left_coords": left_coords,
@@ -35,9 +38,9 @@ app = Flask(__name__)
 
 # Initialize the TrafficModel with the specified parameters
 model = TrafficModel(
+    num_agents=2,
     width=24,
     height=24,
-    num_agents=2,
     coords=coords,
     buildings_coords=buildings_coords,
     parking_coords=parking_spots,
@@ -68,7 +71,6 @@ def get_cars():
 @app.route("/trafficLights")
 def get_trafficLights():
     global trafficLights
-    model.step()
     return jsonify(trafficLights)
 
 
