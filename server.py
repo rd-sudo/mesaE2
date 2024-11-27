@@ -51,8 +51,8 @@ cars = None
 trafficLights = None
 
 
-@app.route("/")
-def index():
+@app.route("/step")
+def step():
     """
     Default route that returns a simple JSON message.
     """
