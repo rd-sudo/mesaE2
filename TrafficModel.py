@@ -85,7 +85,7 @@ class TrafficModel(mesa.Model):
 
         # Create the CarAgents and place them on the grid
         self.create_CarAgents()
-        self.create_CarAgents_no_target()
+        #self.create_CarAgents_no_target()
 
         # Place the traffic lights on the grid
         self.place_TrafficLight_agents()
@@ -182,7 +182,7 @@ class TrafficModel(mesa.Model):
 
             # Place the agent in the 'Spawn' cell using the correct coordinates
             self.grid.place_agent(agent, Spawn)
-
+    ''' 
     def create_CarAgents_no_target(self):
         """Create car agents without a target parking spot."""
         number_of_cars = 50
@@ -199,7 +199,7 @@ class TrafficModel(mesa.Model):
             available_coords.remove(spawn_position)
             agent = CarAgent(self, spawn_position, None)
             self.grid.place_agent(agent, spawn_position)
-
+    '''
 
 
 
@@ -235,12 +235,11 @@ class TrafficModel(mesa.Model):
     def get_cell_directions(self, pos):    
         return self.directions.get(pos, None)
 
-    # Create a global map of the current state of the simulation
     def get_global_map(self):
         """
         Generate a global map of the current state of the simulation.
         """
-        # Add the current step and agents' positions to the global_map
+        # Initialize the global map structure
         self.global_map = {
             "Cars": [],
             "Traffic_Lights": {}
@@ -259,7 +258,7 @@ class TrafficModel(mesa.Model):
 
         # Append the positions of the sorted CarAgents to the global_map
         for agent in sorted(car_agents, key=lambda agent: agent.unique_id):
-            self.global_map["Cars"].append(agent.pos)
+            self.global_map["Cars"].append({"x": agent.pos[0], "y": agent.pos[1]})
 
         # Append the traffic light data to the global_map
         self.global_map["Traffic_Lights"] = traffic_lights
@@ -268,9 +267,7 @@ class TrafficModel(mesa.Model):
         print(self.global_map)
 
         # Return the cars' positions and the traffic lights data
-        return self.global_map["Cars"], self.global_map["Traffic_Lights"]
-
-
+        return {"Cars": self.global_map["Cars"]}, {"Traffic_Lights": self.global_map["Traffic_Lights"]}
     
     # LAYER METHODS----------------------------------------------------------------------------------
     # Set the value of cells to indicate buildings
