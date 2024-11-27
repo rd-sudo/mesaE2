@@ -18,30 +18,27 @@ from mapBuild.downRightCoords import down_right_coords
 from mapBuild.upLeftCoords import up_left_coords
 from mapBuild.upRightCoords import up_right_coords
 
-# Storing the coordinates in a dictionary
-coords = {
-    "left_coords": left_coords,
-    "right_coords": right_coords,
-    "up_coords": up_coords,
-    "down_coords": down_coords,
-    "down_left_coords": down_left_coords,
-    "down_right_coords": down_right_coords,
-    "up_left_coords": up_left_coords,
-    "up_right_coords": up_right_coords,
-}
+from CarAgent import CarAgent
+from TrafficLightAgent import TrafficLightAgent
+
+
 
 # Initialize the Flask application
 app = Flask(__name__)
 
+
 # Initialize the TrafficModel with the specified parameters
 model = TrafficModel(
+    num_agents=10,
     width=24,
     height=24,
-    num_agents=2,
-    coords=coords,
+    left_coords= left_coords,
+    right_coords=right_coords,
+    up_coords=up_coords,
+    down_coords=down_coords,
     buildings_coords=buildings_coords,
     parking_coords=parking_spots,
-    traffic_light_coords=traffic_light_coords,
+    traffic_light_coords=traffic_light_coords
 )
 
 cars = None
