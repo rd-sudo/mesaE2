@@ -40,42 +40,45 @@ class CarAgent(mesa.Agent):
             return False
 
     def move(self):
-# Get current position and allowed directions
         current_position = self.pos
         possible_current_directions = self.model.get_cell_directions(current_position)
         
-        # Check for any available directions in this cell
         if not possible_current_directions:
-            #print(f"No directions available for agent at position {current_position}")
             return
 
-        # Filter allowed directions and select one randomly
         possible_directions = [direction for direction, allowed in possible_current_directions.items() if allowed]
         if not possible_directions:
-            #print(f"No movement options for agent at position {current_position}")
             return
 
-        # Checks if it can move acccording to the sempahore
         if not self.check_semaphore(current_position):
             return 
 
-        direction = random.choice(possible_directions)
-
-        # Calculate the new position based on the chosen direction
-        dx, dy = {
+        direction_map = {
             "up": (0, 1),
             "down": (0, -1),
             "left": (-1, 0),
-            "right": (1, 0)
-        }[direction]
+            "right": (1, 0),
+            "up_left": (-1, 1),
+            "up_right": (1, 1),
+            "down_left": (-1, -1),
+            "down_right": (1, -1)
+        }
 
+        direction = random.choice(possible_directions)
+        if direction not in direction_map:
+            print(f"Invalid direction: {direction}")
+            return
+
+        dx, dy = direction_map[direction]
         new_position = (self.pos[0] + dx, self.pos[1] + dy)
+
         if not self.check_agent(new_position):
             return 
-        
+
         self.model.grid.move_agent(self, new_position)
-        self.distance_travelled += 1  # Increment distance traveled
-        self.pos = new_position       # Update the position
+        self.distance_travelled += 1
+        self.pos = new_position
+
             
     def move_to_target(self):
         # Moverse hasta alcanzar el destino
