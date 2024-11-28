@@ -20,6 +20,19 @@ from mapBuild.upRightCoords import up_right_coords
 
 from CarAgent import CarAgent
 from TrafficLightAgent import TrafficLightAgent
+from mapBuild.monitoring_coords import monitoring_coords
+
+coords = {
+    "left_coords": left_coords,
+    "right_coords": right_coords,
+    "up_coords": up_coords,
+    "down_coords": down_coords,
+    "down_left_coords": down_left_coords,
+    "down_right_coords": down_right_coords,
+    "up_left_coords": up_left_coords,
+    "up_right_coords": up_right_coords,
+    "monitoring_coords": monitoring_coords,
+}
 
 
 
@@ -29,17 +42,16 @@ app = Flask(__name__)
 
 # Initialize the TrafficModel with the specified parameters
 model = TrafficModel(
-    num_agents=10,
+    num_agents=17,
     width=24,
     height=24,
-    left_coords= left_coords,
-    right_coords=right_coords,
-    up_coords=up_coords,
-    down_coords=down_coords,
+    coords = coords,
     buildings_coords=buildings_coords,
     parking_coords=parking_spots,
     traffic_light_coords=traffic_light_coords
 )
+
+
 
 cars = None
 trafficLights = None
