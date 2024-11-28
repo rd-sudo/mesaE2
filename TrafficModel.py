@@ -176,40 +176,40 @@ class TrafficModel(mesa.Model):
 
     # Create agents and place them on the grid
     def create_CarAgents(self):
-        """Create car agents and place them on the grid."""
-        used_parking_spots = set()
+        # Crear listas separadas para manejar spawn y target
+        spawn_spots = list(self.ParkingSpots.values())  # Copia de espacios de spawn disponibles
+        target_spots = list(self.ParkingSpots.values())  # Copia de espacios para objetivos
 
-        for _ in range(self.num_agents):
-            available_spawn_spots = [
-                spot
-                for spot in self.ParkingSpots.values()
-                if spot not in used_parking_spots
-            ]
-
-            if not available_spawn_spots:
-                print("No available spots for spawn")
+        for i in range(self.num_agents):
+            # Verificar si hay lugares disponibles para spawn
+            if not spawn_spots:
+                print("No available spawn spots left")
                 break
 
-            spawn = random.choice(available_spawn_spots)
-            used_parking_spots.add(spawn)
+            # Seleccionar un espacio de spawn único
+            Spawn = random.choice(spawn_spots)
+            spawn_spots.remove(Spawn)  # Remover el espacio de spawn para evitar reutilización
 
-            available_target_spots = [
-                spot
-                for spot in self.ParkingSpots.values()
-                if spot != spawn and spot not in used_parking_spots
-            ]
+            # Filtrar espacios para el target, excluyendo el spawn actual
+            possible_target_spots = [spot for spot in target_spots if spot != Spawn]
 
-            if not available_target_spots:
-                print("No available spots for target parking")
+            # Verificar si hay lugares disponibles para el target
+            if not possible_target_spots:
+                print("No available target spots left")
                 break
 
-            target_parking_spot = random.choice(available_target_spots)
-            used_parking_spots.add(target_parking_spot)
+            # Seleccionar un espacio objetivo único
+            target_parking_spot = random.choice(possible_target_spots)
+            target_spots.remove(target_parking_spot)  # Remover el espacio de target para evitar reutilización
 
-            print(f"Spawn: ({spawn}), Target: ({target_parking_spot})")
+            print(f"Spawn: {Spawn}, Target: {target_parking_spot}")
 
-            agent = CarAgent(self, spawn, target_parking_spot)
-            self.grid.place_agent(agent, spawn)
+            # Crear el agente con los espacios asignados
+            agent = CarAgent(self, Spawn, target_parking_spot)
+
+            # Colocar el agente en el grid en su posición de spawn
+            self.grid.place_agent(agent, Spawn)
+
 
     def create_CarAgents_no_target(self):
         """Create car agents without a target parking spot."""

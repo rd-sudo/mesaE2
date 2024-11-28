@@ -39,7 +39,7 @@ app = Flask(__name__)
 
 # Initialize the TrafficModel with the specified parameters
 model = TrafficModel(
-    num_agents=10,
+    num_agents=17,
     width=24,
     height=24,
     coords=coords,
