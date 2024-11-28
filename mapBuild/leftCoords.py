@@ -29,9 +29,9 @@ left_coords = [
     (6, 4),
     # LONG STREET row 11 and 10 crosses the MAP////////////// TURN 4
     # Left lane
-    *[(x, 11) for x in range(1, 23)],
+    *[(x, 11) for x in range(2, 23)],
     # Right lane part 1
-    *[(x, 10) for x in range(1, 13)],
+    *[(x, 10) for x in range(2, 13)],
     # Right lane part 2
     *[(x, 10) for x in range(16, 23)],
     # Short street row 17 and 16///////////////////////////// TURN 3
