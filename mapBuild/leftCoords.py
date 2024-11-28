@@ -4,7 +4,7 @@ left_coords = [
     # Left lane p1
     *[(x, 23) for x in range(1, 24)],
     # Right lane p1
-    *[(x, 22) for x in range(1, 24)],
+    *[(x, 22) for x in range(1, 23)],
     # Short street row 18 and 17 red light//////////////// TURN 2
     (8, 18),
     (9, 18),
