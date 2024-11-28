@@ -5,7 +5,7 @@ from CarAgent import CarAgent
 class TrafficLightAgent(mesa.Agent):
     def __init__(self, unique_id, state, model, monitored_positions):
         super().__init__(model)
-        self.unique_id = unique_id
+        self.unique_id = f"sema_{unique_id}"
         self.state = state
         self.time_counter = 0
         self.monitored_positions = monitored_positions
