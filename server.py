@@ -18,10 +18,20 @@ from mapBuild.downRightCoords import down_right_coords
 from mapBuild.upLeftCoords import up_left_coords
 from mapBuild.upRightCoords import up_right_coords
 
-from CarAgent import CarAgent
-from TrafficLightAgent import TrafficLightAgent
+from mapBuild.monitoring_coords import monitoring_coords
 
-
+# Storing the coordinates in a dictionary
+coords = {
+    "left_coords": left_coords,
+    "right_coords": right_coords,
+    "up_coords": up_coords,
+    "down_coords": down_coords,
+    "down_left_coords": down_left_coords,
+    "down_right_coords": down_right_coords,
+    "up_left_coords": up_left_coords,
+    "up_right_coords": up_right_coords,
+    "monitoring_coords": monitoring_coords,
+}
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -32,20 +42,18 @@ model = TrafficModel(
     num_agents=10,
     width=24,
     height=24,
-    left_coords= left_coords,
-    right_coords=right_coords,
-    up_coords=up_coords,
-    down_coords=down_coords,
+    coords=coords,
     buildings_coords=buildings_coords,
     parking_coords=parking_spots,
-    traffic_light_coords=traffic_light_coords
+    traffic_light_coords=traffic_light_coords,
 )
+
 
 cars = None
 trafficLights = None
 
 
-@app.route("/")
+@app.route("/test")
 def index():
     """
     Default route that returns a simple JSON message.
@@ -56,17 +64,27 @@ def index():
     return jsonify({"Step": model.steps})
 
 
-@app.route("/cars")
+@app.route("/TestCars")
 def get_cars():
     global cars
     return jsonify(cars)
 
 
-@app.route("/trafficLights")
+@app.route("/TestTrafficLights")
 def get_trafficLights():
     global trafficLights
     model.step()
     return jsonify(trafficLights)
+
+
+@app.route("/global_map")
+def get_global_map_route():
+    """
+    Route to get the global map of the model.
+    """
+    # Run the model for a specified number of steps and store the global map
+    model.step()
+    return jsonify(model.get_global_map())
 
 
 if __name__ == "__main__":
