@@ -13,7 +13,7 @@ up_left_coords = [
     # Vertical LINES
     *[(7, y) for y in range(12, 21)],
     # Line 15
-    *[(15, y) for y in range(11, 21)],
+    *[(15, y) for y in range(12, 21)],
     *[(15, y) for y in range(2, 7)],
     # Lane 19 near parking 17
     *[(19, y) for y in range(2, 7)],

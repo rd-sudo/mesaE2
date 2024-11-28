@@ -2,9 +2,9 @@
 up_coords = [
     # SHORT STREET row 6 ////////////// ROUTE 1
     # Left lane
-    *[(6, y) for y in range(12, 22)],
+    *[(6, y) for y in range(11, 22)],
     # Right lane
-    *[(7, y) for y in range(12, 22)],
+    *[(7, y) for y in range(11, 22)],
     # LONG STREET row 14 crosses the MAP ////////////// ROUTE 2 **roundabout, lane change
     # Left lane p1
     *[(14, y) for y in range(1, 8)],

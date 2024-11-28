@@ -9,5 +9,6 @@ up_right_coords = [
     *[(6, y) for y in range(12, 21)],
     *[(14, y) for y in range(2, 7)],
     *[(14, y) for y in range(12, 21)],
+    *[(18, y) for y in range(2, 7)],
     *[(22, y) for y in range(1, 21)],
 ]

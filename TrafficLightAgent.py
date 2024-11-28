@@ -5,7 +5,7 @@ from CarAgent import CarAgent
 class TrafficLightAgent(mesa.Agent):
     def __init__(self, unique_id, state, model, monitored_positions):
         super().__init__(model)
-        self.unique_id = unique_id
+        self.unique_id = f"sema_{unique_id}"
         self.state = state
         self.time_counter = 0
         self.monitored_positions = monitored_positions
@@ -49,26 +49,11 @@ class TrafficLightAgent(mesa.Agent):
         """Compara el tráfico en su área monitoreada con los vecinos y ajusta estados."""
         current_traffic = self.cars_in_monitored_area()
 
-        # Imprimir información del agente actual
-        print(
-            f"Traffic Light {self.unique_id} at {self.pos} with current state {self.state}"
-        )
-
-        # Imprimir información de vecinos hermanos
-        print(f"  Sibling neighbors of Traffic Light {self.unique_id}:")
         for sibling in self.neighbor_siblings:
             sibling_traffic = sibling.cars_in_monitored_area()
-            print(
-                f"    Sibling {sibling.unique_id} at {sibling.pos} with state {sibling.state} and traffic {sibling_traffic}"
-            )
 
-        # Imprimir información de vecinos opuestos
-        print(f"  Opposite neighbors of Traffic Light {self.unique_id}:")
         for opposite in self.neighbor_opposites:
             opposite_traffic = opposite.cars_in_monitored_area()
-            print(
-                f"    Opposite {opposite.unique_id} at {opposite.pos} with state {opposite.state} and traffic {opposite_traffic}"
-            )
 
         # Cambiar el estado basado en el tráfico
         if current_traffic == 0:
@@ -90,12 +75,15 @@ class TrafficLightAgent(mesa.Agent):
                 tempSelf = opposite
                 for sibling in self.neighbor_siblings:
                     sibling.state = self.state
+            elif current_traffic == opposite_traffic:
+                self.state = 2
+                opposite.state = 1
+                tempSelf = opposite
+                for sibling in self.neighbor_siblings:
+                    sibling.state = self.state
 
         # Obtener vecinos de tempSelf
         if tempSelf:
-            print(
-                f"TempSelf is set to Opposite Traffic Light {tempSelf.unique_id} at {tempSelf.pos} with state {tempSelf.state}"
-            )
             tempSelf_neighbors = self.model.grid.get_neighbors(
                 tempSelf.pos, moore=True, include_center=False
             )
@@ -105,13 +93,9 @@ class TrafficLightAgent(mesa.Agent):
                 if isinstance(agent, TrafficLightAgent)
             ]
 
-            # Imprimir vecinos de tempSelf
-            print(f"  Neighbors of TempSelf (Traffic Light {tempSelf.unique_id}):")
             for neighbor in tempSelf_traffic_lights:
                 neighbor_traffic = neighbor.cars_in_monitored_area()
-                print(
-                    f"    Neighbor {neighbor.unique_id} at {neighbor.pos} with state {neighbor.state} and traffic {neighbor_traffic}"
-                )
+
                 if tempSelf.unique_id == neighbor.unique_id:
                     neighbor.state = tempSelf.state
 

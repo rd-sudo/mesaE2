@@ -78,13 +78,16 @@ def get_trafficLights():
 
 
 @app.route("/global_map")
-def get_global_map_route():
+def get_global_map():
     """
     Route to get the global map of the model.
     """
     # Run the model for a specified number of steps and store the global map
     model.step()
-    return jsonify(model.get_global_map())
+    # Obtén el mapa global
+    global_map = model.get_global_map()
+    # Envolver el mapa en una lista
+    return jsonify({"global_map": [global_map]})
 
 
 if __name__ == "__main__":
