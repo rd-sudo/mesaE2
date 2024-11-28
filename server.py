@@ -40,6 +40,7 @@ app = Flask(__name__)
 # Initialize the TrafficModel with the specified parameters
 model = TrafficModel(
     num_agents=17,
+    num_agents=17,
     width=24,
     height=24,
     coords=coords,
@@ -54,6 +55,7 @@ trafficLights = None
 
 
 @app.route("/test")
+@app.route("/test")
 def index():
     """
     Default route that returns a simple JSON message.
@@ -65,11 +67,13 @@ def index():
 
 
 @app.route("/TestCars")
+@app.route("/TestCars")
 def get_cars():
     global cars
     return jsonify(cars)
 
 
+@app.route("/TestTrafficLights")
 @app.route("/TestTrafficLights")
 def get_trafficLights():
     global trafficLights
