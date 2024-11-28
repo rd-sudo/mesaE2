@@ -265,26 +265,29 @@ class TrafficModel(mesa.Model):
 
     # Create a global map of the current state of the simulation
     # Create a global map of the current state of the simulation
+    # Create a global map of the current state of the simulation
     def get_global_map(self):
-        """
-        Generate a global map of the current state of the simulation in the specified JSON format.
-        """
-        # Inicializar el mapa global
+        car_agents = []
+        traffic_lights = {}
+
         self.global_map = {"Cars": [], "Traffic_Lights": {}}
 
-        # Recopilar agentes
         for contents, (x, y) in self.grid.coord_iter():
             for agent in contents:
                 if isinstance(agent, CarAgent):
-                    # Agregar las coordenadas del agente CarAgent al formato deseado
-                    self.global_map["Cars"].append({"x": x, "y": y})
+                    car_agents.append(agent)
                 elif isinstance(agent, TrafficLightAgent):
-                    # Agregar datos del semáforo al formato deseado
-                    self.global_map["Traffic_Lights"][
-                        f"sema_{agent.unique_id}"
-                    ] = agent.state
+                    traffic_lights[f"sema_{agent.unique_id}"] = agent.state
 
-        # Devolver el mapa global en el formato solicitado
+        # Sort car agents by unique_id
+        car_agents.sort(key=lambda agent: agent.unique_id)
+
+        # Add sorted car agents to the global map
+        for agent in car_agents:
+            self.global_map["Cars"].append({"x": agent.pos[0], "y": agent.pos[1]})
+
+        # Add traffic lights to the global map
+        self.global_map["Traffic_Lights"] = traffic_lights
         return self.global_map
 
     # LAYER METHODS----------------------------------------------------------------------------------
