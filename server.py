@@ -45,7 +45,7 @@ cars = None
 trafficLights = None
 
 
-@app.route("/")
+@app.route("/test")
 def index():
     """
     Default route that returns a simple JSON message.
@@ -56,17 +56,28 @@ def index():
     return jsonify({"Step": model.steps})
 
 
-@app.route("/cars")
+@app.route("/TestCars")
 def get_cars():
     global cars
     return jsonify(cars)
 
 
-@app.route("/trafficLights")
+@app.route("/TestTrafficLights")
 def get_trafficLights():
     global trafficLights
     model.step()
     return jsonify(trafficLights)
+
+
+@app.route("/global_map")
+def get_global_map():
+    """
+    Route to get the global map of the model.
+    """
+    # Run the model for a specified number of steps and store the global map
+    model.step()
+    return jsonify(model.get_global_map())
+
 
 
 if __name__ == "__main__":
